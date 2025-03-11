@@ -1,0 +1,76 @@
+<form version="1.1" theme="dark">
+  <label>Jamulus_Stats</label>
+  <fieldset submitButton="true" autoRun="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Connection Location History</title>
+      <table>
+        <search>
+          <query>source="/srv/Splunk/Jamulus/jamulus*"  
+|  stats values(city) by timezone</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Active Jamulus Connections</title>
+      <single>
+        <title>Time set to last 20 minutes, which is when tunnel and API are checked</title>
+        <search>
+          <query>source="/srv/Splunk/Jamulus/jamulus_connections.log" 
+| stats count as myCount</query>
+          <earliest>-20m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Jamulus Connection Map</title>
+      <map>
+        <search>
+          <query>sourcetype="jamulus_locations-2" 
+|  dedup username | geostats latfield=latitude longfield=longitude count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.map.center">(27.06,-55.94)</option>
+        <option name="mapping.map.zoom">4</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Internet Service Provider Data</title>
+      <table>
+        <title>I misspelled organization</title>
+        <search>
+          <query>source="/srv/Splunk/Jamulus/jamulus_connection*" 
+| rename Orgganization as Organization
+|  stats values(Organization) by ASN</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>
